@@ -3,7 +3,7 @@ pkgver=2.4.1
 pkgrel=1
 url="https://box2d.org/"
 source=("https://github.com/erincatto/box2d/archive/refs/tags/v${pkgver}.tar.gz")
-sha256sums=('SKIP')
+sha256sums=('d6b4650ff897ee1ead27cf77a5933ea197cbeef6705638dd181adc2e816b23c2')
 
 build() {
   cd box2d-$pkgver

@@ -1,9 +1,9 @@
 pkgname=expat
-pkgver=2.5.0
+pkgver=2.6.2
 pkgrel=1
 url="https://libexpat.github.io/"
-source=("https://github.com/libexpat/libexpat/releases/download/R_2_5_0/$pkgname-$pkgver.tar.xz")
-sha256sums=('ef2420f0232c087801abf705e89ae65f6257df6b7931d37846a193ef2e8cdcbe')
+source=("https://github.com/libexpat/libexpat/releases/download/R_2_6_2/$pkgname-$pkgver.tar.xz")
+sha256sums=('ee14b4c5d8908b1bec37ad937607eab183d4d9806a08adee472c3c3121d27364')
 
 build() {
   cd $pkgname-$pkgver
