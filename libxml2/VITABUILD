@@ -1,9 +1,9 @@
 pkgname=libxml2
-pkgver=2.13.3
+pkgver=2.14.2
 pkgrel=1
 url="https://gitlab.gnome.org/GNOME/libxml2/-/wikis/home"
-source=("https://download.gnome.org/sources/libxml2/2.13/libxml2-2.13.3.tar.xz" "libxml2-no-pic.patch")
-sha256sums=('0805d7c180cf09caad71666c7a458a74f041561a532902454da5047d83948138' '0039a77f674653074a5ce0cbbecefd850246820cd86754c934308beb488a7507')
+source=("https://download.gnome.org/sources/libxml2/2.14/libxml2-2.14.2.tar.xz" "libxml2-no-pic.patch")
+sha256sums=('353f3c83535d4224a4e5f1e88c90b5d4563ea8fec11f6407df640fd28fc8b8c6' '0039a77f674653074a5ce0cbbecefd850246820cd86754c934308beb488a7507')
 depends=('zlib')
 
 prepare() {
