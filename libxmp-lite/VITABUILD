@@ -1,9 +1,9 @@
 pkgname=libxmp-lite
-pkgver=4.6.0
+pkgver=4.6.2
 pkgrel=1
 url="https://github.com/libxmp/libxmp"
 source=("https://github.com/libxmp/libxmp/releases/download/libxmp-${pkgver}/${pkgname}-${pkgver}.tar.gz")
-sha256sums=('71a93eb0119824bcc56eca95db154d1cdf30304b33d89a4732de6fef8a2c6f38')
+sha256sums=('f4d03ea076c4beecd1c834d07cf7adadb6e680ae45dcc9cf8aff279c4748d003')
 
 build() {
   cd $pkgname-$pkgver
