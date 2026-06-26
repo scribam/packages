@@ -8,6 +8,10 @@ on:
   repository_dispatch:
     types: [run_build]
 
+env:
+  ACTIONS_RUNNER_DEBUG: true
+  ACTIONS_STEP_DEBUG: true
+
 jobs:
   prepare_jobs:
     runs-on: ubuntu-latest
