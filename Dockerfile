@@ -72,6 +72,14 @@ RUN wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tar.xz \
     && make install \
     && cd .. && rm -rf Python-2.7.18*
 
+# Install CMake from https://apt.kitware.com/
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null \
+    && echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ noble main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null \
+    && sudo apt-get update \
+    && sudo rm /usr/share/keyrings/kitware-archive-keyring.gpg \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends kitware-archive-keyring \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends cmake
+
 # Clone and install VitaSDK
 # We use the existing bootstrap-vitasdk.sh logic
 ARG VITASDK_CACHE_BUST
