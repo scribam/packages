@@ -4,7 +4,7 @@ pkgrel=1
 url="https://www.assimp.org/"
 source=("https://github.com/assimp/assimp/archive/refs/tags/v${pkgver}.tar.gz" "assimp-no-pic.patch")
 sha256sums=("edf3749559c2b7d1f758ffb66fc5bec62186221e623b7f2e8969f17ee46ecb6f" "5c51cd6fef5d75004cdc1b9511771cab6d3e266a217f11bf3b94aff452d0d1a4")
-depends=('minizip zlib')
+depends=('minizip' 'zlib')
 
 prepare() {
   cd assimp-$pkgver

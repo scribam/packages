@@ -5,7 +5,7 @@ gitrev=eba26b54b5ce7f1c99a75a116c4719a432354f90
 url="https://github.com/libsdl-org/SDL_ttf"
 source=("https://github.com/libsdl-org/SDL_ttf/archive/${gitrev}.zip")
 sha256sums=('SKIP')
-depends=('sdl freetype libpng')
+depends=('sdl' 'freetype' 'libpng')
 
 build() {
   cd SDL_ttf-${gitrev}
@@ -18,4 +18,3 @@ package () {
   cd SDL_ttf-${gitrev}
   make DESTDIR=$pkgdir install
 }
-

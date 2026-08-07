@@ -4,7 +4,7 @@ pkgrel=1
 url="https://libsndfile.github.io/libsndfile/"
 source=("https://github.com/$pkgname/$pkgname/releases/download/$pkgver/$pkgname-$pkgver.tar.xz")
 sha256sums=('3799ca9924d3125038880367bf1468e53a1b7e3686a934f098b7e1d286cdb80e')
-depends=('flac lame libogg libvorbis mpg123 opus')
+depends=('flac' 'lame' 'libogg' 'libvorbis' 'mpg123' 'opus')
 
 build() {
   cd $pkgname-$pkgver

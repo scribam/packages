@@ -11,7 +11,7 @@ sha256sums=(
     "393f5efb50536ec13ca4f4affb69cc9966d3c3f969e6c5e701faddf9f9785381"
     "a35580ce63abb881753d5751c1fdb61c4276ddce1253125654d9a8b082a1aa58"
 )
-depends=('sdl2 libpng libwebp libjpeg-turbo zlib')
+depends=('sdl2' 'libpng' 'libwebp' 'libjpeg-turbo' 'zlib')
 
 prepare() {
   cd SDL2_image-${pkgver}

@@ -4,7 +4,7 @@ pkgrel=1
 url="https://github.com/Rinnegatamante/$pkgname"
 source=("https://github.com/Rinnegatamante/$pkgname/archive/refs/tags/v.$pkgver.tar.gz")
 sha256sums=('07fd6b72c3cd9a7ce85b73474d85a3b10d6ca5e0d5e0eccb1715b68de895376c')
-depends=('taihen SceShaccCgExt')
+depends=('taihen' 'SceShaccCgExt')
 
 build() {
   cd $pkgname-v.$pkgver

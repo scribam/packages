@@ -11,7 +11,7 @@ sha256sums=(
     "63547d58d0185c833213885b635a2c0548201cc8f301e6587c0be1a67e1e045d"
     "5c13ff3faa6ad0a650a93d890068c69532b606f67909d5fb1af1eabd90d94e59"
 )
-depends=('sdl3 freetype harfbuzz')
+depends=('sdl3' 'freetype' 'harfbuzz')
 
 prepare() {
   cd SDL3_ttf-${pkgver}

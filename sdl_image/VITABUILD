@@ -8,7 +8,7 @@ sha256sums=(
     1b015943b51cf5b2424a58a183180bd43c417f275ae9888e15141e54ebbf1ccf
     22576ad8cc2ab197c0406467eba53f75ca5203b97e680779879bf95e67b5a694
 )
-depends=('sdl libpng libjpeg-turbo libwebp zlib')
+depends=('sdl' 'libpng' 'libjpeg-turbo' 'libwebp' 'zlib')
 
 prepare() {
   cd "SDL_image-${pkgver}"
