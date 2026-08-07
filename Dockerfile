@@ -21,6 +21,8 @@ RUN apt-get update && \
     wget \
     git \
     cmake \
+    meson \
+    ninja-build \
     make \
     patch \
     fakeroot \
@@ -42,6 +44,7 @@ RUN apt-get update && \
     gperf \
     bison \
     flex \
+    gettext \
     linux-libc-dev \
     gcc-multilib \
     libssl-dev \
@@ -81,12 +84,43 @@ RUN echo "VitaSDK Cache Bust: $VITASDK_CACHE_BUST" && \
     && bash bootstrap-vitasdk.sh \
     && rm -rf /vdpm
 
+# Install the static rootless pacman client while the package-managed bootstrap
+# is being introduced. Once autobuilds publishes vitasdk-core packages this
+# transitional source build is removed from the image.
+ARG BUILDSCRIPTS_REF=next
+RUN git clone --depth=1 --branch "$BUILDSCRIPTS_REF" \
+      https://github.com/vitasdk/buildscripts.git /buildscripts \
+    && cmake -S /buildscripts -B /buildscripts/build-pacman \
+      -DBUILD_PACMAN_CLIENT=ON \
+      -DPACMAN_CLIENT_INSTALL_DIR=/pacman-client \
+    && cmake --build /buildscripts/build-pacman \
+      --target pacman-client-spike --parallel "$(nproc)" \
+    && install -m755 /pacman-client/bin/pacman /usr/local/vitasdk/bin/pacman \
+    && install -m755 /pacman-client/bin/pacman-conf \
+      /usr/local/vitasdk/bin/pacman-conf \
+    && rm -rf /buildscripts /pacman-client
+
+ARG VITA_MAKEPKG_REF=next
+RUN git clone --depth=1 --branch "$VITA_MAKEPKG_REF" \
+      https://github.com/vitasdk/vita-makepkg.git /opt/vita-makepkg \
+    && cp /opt/vita-makepkg/makepkg.conf.sample /opt/vita-makepkg/makepkg.conf \
+    && ln -sf /opt/vita-makepkg/vita-makepkg /usr/local/vitasdk/bin/vita-makepkg \
+    && install -d /usr/local/vitasdk/etc \
+      /usr/local/vitasdk/var/lib/pacman \
+      /usr/local/vitasdk/var/cache/pacman/pkg \
+      /usr/local/vitasdk/var/log \
+    && printf '%s\n' \
+      '[options]' \
+      'Architecture = auto vita' \
+      'SigLevel = Never' \
+      > /usr/local/vitasdk/etc/pacman.conf
+
 # Set environment variables
 ENV VITASDK=/usr/local/vitasdk
 ENV PATH=$VITASDK/bin:$PATH
 
 # Ensure the non-root user owns the vitasdk directory
-RUN chown -R vita:vita /usr/local/vitasdk
+RUN chown -R vita:vita /usr/local/vitasdk /opt/vita-makepkg
 
 USER vita
 WORKDIR /workspace

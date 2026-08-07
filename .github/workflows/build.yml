@@ -2,33 +2,48 @@ name: Packages
 
 on:
   workflow_dispatch:
+  push:
+    branches: [master, next]
   pull_request:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "17 2 * * *"
   repository_dispatch:
     types: [run_build]
+
+concurrency:
+  group: packages-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   prepare_jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Install dependencies
+      - name: Prepare build matrix
         id: set-matrix
+        shell: bash
         run: |
-          echo "matrix<<EOF" >> $GITHUB_OUTPUT
-          node create-matrix.js >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          if [ "${{ github.event.pull_request.head.repo.fork }}" = "true" ]; then
-            TAG="master"
+          echo 'matrix<<EOF' >> "$GITHUB_OUTPUT"
+          node create-matrix.js >> "$GITHUB_OUTPUT"
+          echo 'EOF' >> "$GITHUB_OUTPUT"
+          if [[ '${{ github.event.pull_request.head.repo.fork }}' == 'true' ]]; then
+            tag=master
           else
-            TAG=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9._-]/-/g')
+            tag=$(sed 's/[^a-zA-Z0-9._-]/-/g' \
+              <<< '${{ github.head_ref || github.ref_name }}')
           fi
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          if [[ '${{ github.base_ref || github.ref_name }}' == 'next' ]]; then
+            dependency_ref=next
+          else
+            dependency_ref=master
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "dependency_ref=$dependency_ref" >> "$GITHUB_OUTPUT"
 
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       tag: ${{ steps.set-matrix.outputs.tag }}
+      dependency_ref: ${{ steps.set-matrix.outputs.dependency_ref }}
 
   prepare_docker:
     runs-on: ubuntu-latest
@@ -37,12 +52,10 @@ jobs:
       contents: read
       packages: write
     steps:
-      - name: Skip Docker Build/Push for External Forks
+      - name: Explain external-fork image selection
         if: github.event.pull_request.head.repo.fork == true
         run: |
-          echo "Esta PR proviene de un fork externo."
-          echo "Se omite la construcción/subida de Docker para evitar errores de permisos."
-          echo "Los trabajos de compilación usarán la imagen estable de 'master'."
+          echo 'External forks use the published master build image.'
       - uses: actions/checkout@v6
         if: github.event.pull_request.head.repo.fork != true
       - name: Set up Docker Buildx
@@ -66,6 +79,8 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             VITASDK_CACHE_BUST=${{ github.run_id }}-${{ github.run_attempt }}
+            BUILDSCRIPTS_REF=${{ needs.prepare_jobs.outputs.dependency_ref }}
+            VITA_MAKEPKG_REF=${{ needs.prepare_jobs.outputs.dependency_ref }}
 
   build_tier0_main:
     needs: [prepare_jobs, prepare_docker]
@@ -207,18 +222,77 @@ jobs:
 
     secrets: inherit
 
-  upload-releases:
+  create-repository:
     needs: [prepare_jobs, build_tier0_main, build_tier0_slow, build_tier1_main, build_tier1_slow, build_tier2_main, build_tier2_slow, build_tier3_main, build_tier3_slow, build_tier4_main, build_tier4_slow]
-    runs-on: ubuntu-latest
-    if: contains(github.ref, 'refs/heads/master') && !cancelled()
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
       - uses: actions/download-artifact@v4
         with:
-          path: package
-          pattern: "!*.dockerbuild"
+          path: packages
+          pattern: package-*
           merge-multiple: true
-      - name: Upload release assets
-        run: gh release upload master package/*.tar.xz --clobber
+
+      - name: Create and validate repository
+        shell: bash
+        run: |
+          source_date_epoch=$(git show -s --format=%ct "$GITHUB_SHA")
+          docker run --rm \
+            --platform linux/amd64 \
+            --mount "type=bind,source=$PWD,target=/workspace,readonly" \
+            --mount "type=bind,source=$PWD/packages,target=/input,readonly" \
+            --mount "type=bind,source=$RUNNER_TEMP,target=/output" \
+            --env "SOURCE_DATE_EPOCH=$source_date_epoch" \
+            archlinux@sha256:c1829f370be8434135f43fb3acaef1256780804ac3b2d2eec90dfb1232e1ffdf \
+            bash -euc \
+              '/workspace/scripts/create-repository.sh /output/repository /input/*.pkg.tar.*'
+
+      - name: Upload repository snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: repository-snapshot
+          path: ${{ runner.temp }}/repository/*
+          if-no-files-found: error
+          retention-days: 14
+
+  publish-snapshot:
+    needs: create-repository
+    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v4
+        with:
+          name: repository-snapshot
+          path: repository
+
+      - name: Revalidate downloaded snapshot
+        shell: bash
+        run: |
+          docker run --rm \
+            --platform linux/amd64 \
+            --mount "type=bind,source=$PWD,target=/workspace,readonly" \
+            archlinux@sha256:c1829f370be8434135f43fb3acaef1256780804ac3b2d2eec90dfb1232e1ffdf \
+            /workspace/scripts/validate-repository.sh /workspace/repository
+
+      - name: Publish immutable snapshot release
+        id: release
+        shell: bash
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          snapshot_tag="packages-snapshot-$(date -u +%Y%m%d).${GITHUB_RUN_NUMBER}.${GITHUB_RUN_ATTEMPT}"
+          echo "tag=$snapshot_tag" >> "$GITHUB_OUTPUT"
+          gh release create "$snapshot_tag" \
+            --draft \
+            --target "$GITHUB_SHA" \
+            --title "$snapshot_tag" \
+            --notes "Vita package repository snapshot from $GITHUB_SHA"
+          gh release upload "$snapshot_tag" repository/*
+
+          mkdir downloaded-release
+          gh release download "$snapshot_tag" --dir downloaded-release
+          diff -ru repository downloaded-release
+          gh release edit "$snapshot_tag" --draft=false

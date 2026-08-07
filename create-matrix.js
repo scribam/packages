@@ -10,13 +10,32 @@ const dependant = new Map();
 let directories = fs.readdirSync(testFolder).filter(file => fs.lstatSync(file).isDirectory());
 directories = directories.filter(directory => fs.readdirSync(directory).includes("VITABUILD"));
 
+function parseDependencies(content) {
+    const dependencies = [];
+    const arrays = /^(?:depends|makedepends|checkdepends)=\(([\s\S]*?)\)/gm;
+    let arrayMatch;
+
+    while ((arrayMatch = arrays.exec(content)) !== null) {
+        const entries = /'([^']*)'|"([^"]*)"|([^\s]+)/g;
+        let entryMatch;
+        while ((entryMatch = entries.exec(arrayMatch[1])) !== null) {
+            const dependency = (entryMatch[1] || entryMatch[2] || entryMatch[3])
+                .replace(/[<>=].*$/, "");
+            if (dependency) dependencies.push(dependency);
+        }
+    }
+
+    return [...new Set(dependencies)];
+}
+
 directories.forEach(directory => {
     const content = fs.readFileSync(path.join(directory, "VITABUILD")).toString();
-    const match = content.match(/^(?:make)?depends=(.*)/m);
-    if (match) {
-        const deps = match[1].replace(/[()'"']/g, "").trim().split(/\s+/).filter(Boolean);
-        if (deps.length > 0) dependant.set(directory, deps);
+    const deps = parseDependencies(content);
+    const missing = deps.filter(dependency => !directories.includes(dependency));
+    if (missing.length > 0) {
+        throw new Error(`${directory} depends on unknown package(s): ${missing.join(', ')}`);
     }
+    if (deps.length > 0) dependant.set(directory, deps);
 });
 
 // Calculate Depth (Tier)
@@ -99,7 +118,7 @@ for (let i = 0; i <= maxD; i++) {
     output[`tier${i}_slow`] = tiersSlow[i];
 }
 
-if (args[0] !== 'deps') {
+if (!args[0]) {
     console.log(JSON.stringify(output));
 }
 
@@ -139,9 +158,9 @@ if (args[0] === 'deps' && args[1]) {
     }
 
     if (deps.length > 0) {
-        console.log(`@(${deps.join('|')})`);
+        console.log(`package-@(${deps.join('|')})`);
     } else {
-        console.log(`@()`);
+        console.log(`package-@()`);
     }
     process.exit(0);
 }
