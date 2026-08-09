@@ -98,7 +98,7 @@ RUN git clone --depth=1 --branch "$BUILDSCRIPTS_REF" \
       /usr/local/vitasdk/bin/pacman-conf \
     && rm -rf /buildscripts /pacman-client
 
-ARG VITA_MAKEPKG_REF=next
+ARG VITA_MAKEPKG_REF=master
 RUN git clone --depth=1 --branch "$VITA_MAKEPKG_REF" \
       https://github.com/vitasdk/vita-makepkg.git /opt/vita-makepkg \
     && cp /opt/vita-makepkg/makepkg.conf.sample /opt/vita-makepkg/makepkg.conf \
