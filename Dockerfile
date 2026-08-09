@@ -15,7 +15,7 @@ RUN apt-get update && \
 # Install dependencies needed for vdpm and building packages
 RUN apt-get update && \
     ARCH=$(dpkg --print-architecture) && \
-    if [ "$ARCH" = "amd64" ]; then LIBC32="libc6-dev-i386"; else LIBC32=""; fi && \
+    if [ "$ARCH" = "amd64" ]; then LIBC32="libc6-dev-i386 gcc-multilib"; else LIBC32=""; fi && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     curl \
     wget \
@@ -46,12 +46,10 @@ RUN apt-get update && \
     flex \
     gettext \
     linux-libc-dev \
-    gcc-multilib \
     libssl-dev \
     unzip \
     zlib1g-dev \
-    libncurses5-dev \
-    libncursesw5-dev \
+    libncurses-dev \
     libreadline-dev \
     libsqlite3-dev \
     libgdbm-dev \
