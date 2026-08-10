@@ -80,7 +80,7 @@ jobs:
           build-args: |
             VITASDK_CACHE_BUST=${{ github.run_id }}-${{ github.run_attempt }}
             BUILDSCRIPTS_REF=${{ needs.prepare_jobs.outputs.dependency_ref }}
-            VITA_MAKEPKG_REF=${{ needs.prepare_jobs.outputs.dependency_ref }}
+            VITA_MAKEPKG_REF=master
 
   build_tier0_main:
     needs: [prepare_jobs, prepare_docker]
