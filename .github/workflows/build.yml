@@ -2,6 +2,19 @@ name: Packages
 
 on:
   workflow_dispatch:
+    inputs:
+      core_snapshot:
+        description: Exact core SDK snapshot tag from vitasdk/autobuilds (e.g. sdk-snapshot-20260811.1.1)
+        required: false
+        type: string
+      packages_ref:
+        description: Branch or commit from vitasdk/packages
+        required: false
+        type: string
+      buildscripts_sha:
+        description: Exact commit SHA from vitasdk/buildscripts
+        required: false
+        type: string
   push:
     branches: [master, next]
   pull_request:
@@ -19,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Prepare build matrix
+      - name: Prepare build matrix and parameters
         id: set-matrix
         shell: bash
         run: |
@@ -32,18 +45,44 @@ jobs:
             tag=$(sed 's/[^a-zA-Z0-9._-]/-/g' \
               <<< '${{ github.head_ref || github.ref_name }}')
           fi
-          if [[ '${{ github.base_ref || github.ref_name }}' == 'next' ]]; then
-            dependency_ref=next
+
+          core_snapshot=""
+          buildscripts_sha=""
+          if [[ '${{ github.event_name }}' == 'repository_dispatch' ]]; then
+            core_snapshot='${{ github.event.client_payload.core_snapshot }}'
+            buildscripts_sha='${{ github.event.client_payload.buildscripts_sha }}'
+            dependency_ref='${{ github.event.client_payload.packages_ref || "next" }}'
+            if [[ -z "$core_snapshot" ]]; then
+              echo "::error::repository_dispatch must provide client_payload.core_snapshot"
+              exit 1
+            fi
+          elif [[ '${{ github.event_name }}' == 'workflow_dispatch' ]]; then
+            core_snapshot='${{ inputs.core_snapshot }}'
+            buildscripts_sha='${{ inputs.buildscripts_sha }}'
+            dependency_ref='${{ inputs.packages_ref || github.ref_name }}'
           else
-            dependency_ref=master
+            if [[ '${{ github.base_ref || github.ref_name }}' == 'next' ]]; then
+              dependency_ref=next
+            else
+              dependency_ref=master
+            fi
           fi
+
+          packages_sha=$(git rev-parse HEAD)
+
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "dependency_ref=$dependency_ref" >> "$GITHUB_OUTPUT"
+          echo "core_snapshot=$core_snapshot" >> "$GITHUB_OUTPUT"
+          echo "buildscripts_sha=$buildscripts_sha" >> "$GITHUB_OUTPUT"
+          echo "packages_sha=$packages_sha" >> "$GITHUB_OUTPUT"
 
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       tag: ${{ steps.set-matrix.outputs.tag }}
       dependency_ref: ${{ steps.set-matrix.outputs.dependency_ref }}
+      core_snapshot: ${{ steps.set-matrix.outputs.core_snapshot }}
+      buildscripts_sha: ${{ steps.set-matrix.outputs.buildscripts_sha }}
+      packages_sha: ${{ steps.set-matrix.outputs.packages_sha }}
 
   prepare_docker:
     runs-on: ubuntu-latest
@@ -80,6 +119,7 @@ jobs:
           build-args: |
             VITASDK_CACHE_BUST=${{ github.run_id }}-${{ github.run_attempt }}
             VDPM_REF=${{ needs.prepare_jobs.outputs.dependency_ref }}
+            CORE_SNAPSHOT=${{ needs.prepare_jobs.outputs.core_snapshot }}
 
   build_tier0_main:
     needs: [prepare_jobs, prepare_docker]
@@ -250,6 +290,16 @@ jobs:
             archlinux@sha256:c1829f370be8434135f43fb3acaef1256780804ac3b2d2eec90dfb1232e1ffdf \
             bash -euc \
               '/workspace/scripts/create-repository.sh /output/repository /input/*.pkg.tar.*'
+          
+          # Generate explicit provenance metadata
+          cat <<EOF > "${{ runner.temp }}/repository/provenance.json"
+          {
+            "schema_version": 1,
+            "core_snapshot": "${{ needs.prepare_jobs.outputs.core_snapshot }}",
+            "packages_revision": "${{ needs.prepare_jobs.outputs.packages_sha }}",
+            "buildscripts_revision": "${{ needs.prepare_jobs.outputs.buildscripts_sha }}"
+          }
+          EOF
 
       - name: Upload repository snapshot
         uses: actions/upload-artifact@v4
@@ -260,7 +310,7 @@ jobs:
           retention-days: 14
 
   publish-snapshot:
-    needs: create-repository
+    needs: [prepare_jobs, create-repository]
     if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/next') && github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
     permissions:
@@ -293,7 +343,7 @@ jobs:
             --draft \
             --target "$GITHUB_SHA" \
             --title "$snapshot_tag" \
-            --notes "Vita package repository snapshot from $GITHUB_SHA"
+            --notes "Vita package repository snapshot from $GITHUB_SHA built against core ${{ needs.prepare_jobs.outputs.core_snapshot }}"
           gh release upload "$snapshot_tag" repository/*
 
           mkdir downloaded-release
@@ -303,9 +353,16 @@ jobs:
 
       - name: Trigger channel manifest update
         env:
-          GH_TOKEN: ${{ secrets.REPO_DISPATCH_TOKEN || github.token }}
+          GH_TOKEN: ${{ secrets.REPO_DISPATCH_TOKEN }}
         shell: bash
         run: |
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "::error::REPO_DISPATCH_TOKEN secret is required for cross-repo dispatch to vitasdk/autobuilds"
+            exit 1
+          fi
           gh api repos/vitasdk/autobuilds/dispatches \
             -f event_type=update_channel \
-            -f client_payload[packages_snapshot]="${snapshot_tag}" || true
+            -f client_payload[core_snapshot]="${{ needs.prepare_jobs.outputs.core_snapshot }}" \
+            -f client_payload[packages_snapshot]="${snapshot_tag}" \
+            -f client_payload[packages_sha]="${{ needs.prepare_jobs.outputs.packages_sha }}" \
+            -f client_payload[buildscripts_sha]="${{ needs.prepare_jobs.outputs.buildscripts_sha }}"

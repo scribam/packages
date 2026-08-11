@@ -73,14 +73,35 @@ RUN wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tar.xz \
     && make install \
     && cd .. && rm -rf Python-2.7.18*
 
-# Clone and install VitaSDK using the pacman-based bootstrap
+# Clone and install VitaSDK using exact core snapshot or development bootstrap
 ARG VITASDK_CACHE_BUST
+ARG CORE_SNAPSHOT
 ARG VDPM_REF=next
 RUN echo "VitaSDK Cache Bust: $VITASDK_CACHE_BUST" && \
-    git clone --depth=1 --branch "$VDPM_REF" https://github.com/vitasdk/vdpm.git /vdpm \
-    && cd /vdpm \
-    && bash bootstrap-vitasdk.sh \
-    && rm -rf /vdpm
+    if [ -n "$CORE_SNAPSHOT" ]; then \
+        echo "Installing VitaSDK from exact core snapshot: $CORE_SNAPSHOT" && \
+        mkdir -p /tmp/vitasdk-bootstrap && \
+        cd /tmp/vitasdk-bootstrap && \
+        bootstrap_url="https://github.com/vitasdk/autobuilds/releases/download/${CORE_SNAPSHOT}/vitasdk-bootstrap-x86_64-linux-gnu.tar.bz2" && \
+        wget -q "$bootstrap_url" -O bootstrap.tar.bz2 || { echo "Failed to download $bootstrap_url"; exit 1; } && \
+        wget -q "${bootstrap_url}.sha256" -O bootstrap.tar.bz2.sha256 || { echo "Failed to download SHA256 sidecar"; exit 1; } && \
+        expected_sha=$(awk '{print $1}' bootstrap.tar.bz2.sha256) && \
+        actual_sha=$(sha256sum bootstrap.tar.bz2 | awk '{print $1}') && \
+        if [ "$expected_sha" != "$actual_sha" ]; then \
+            echo "Checksum mismatch for core snapshot $CORE_SNAPSHOT: expected $expected_sha, got $actual_sha"; exit 1; \
+        fi && \
+        git clone --depth=1 --branch "$VDPM_REF" https://github.com/vitasdk/vdpm.git /vdpm && \
+        VITASDK_BOOTSTRAP_ARCHIVE=/tmp/vitasdk-bootstrap/bootstrap.tar.bz2 \
+        VITASDK_BOOTSTRAP_SHA256="$actual_sha" \
+        bash /vdpm/bootstrap-vitasdk.sh --install-dir /usr/local/vitasdk && \
+        rm -rf /vdpm /tmp/vitasdk-bootstrap ; \
+    else \
+        echo "Installing VitaSDK using development branch: $VDPM_REF" && \
+        git clone --depth=1 --branch "$VDPM_REF" https://github.com/vitasdk/vdpm.git /vdpm && \
+        cd /vdpm && \
+        bash bootstrap-vitasdk.sh && \
+        rm -rf /vdpm ; \
+    fi
 
 # Set environment variables
 ENV VITASDK=/usr/local/vitasdk
