@@ -33,6 +33,7 @@ RUN apt-get update && \
     $LIBC32 \
     python3 \
     python3-pip \
+    nodejs \
     7zip \
     build-essential \
     autoconf \
