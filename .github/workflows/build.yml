@@ -51,7 +51,7 @@ jobs:
           if [[ '${{ github.event_name }}' == 'repository_dispatch' ]]; then
             core_snapshot='${{ github.event.client_payload.core_snapshot }}'
             buildscripts_sha='${{ github.event.client_payload.buildscripts_sha }}'
-            dependency_ref='${{ github.event.client_payload.packages_ref || "next" }}'
+            dependency_ref='${{ github.event.client_payload.packages_ref || 'next' }}'
             if [[ -z "$core_snapshot" ]]; then
               echo "::error::repository_dispatch must provide client_payload.core_snapshot"
               exit 1
