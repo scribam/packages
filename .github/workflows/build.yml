@@ -79,8 +79,7 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             VITASDK_CACHE_BUST=${{ github.run_id }}-${{ github.run_attempt }}
-            BUILDSCRIPTS_REF=${{ needs.prepare_jobs.outputs.dependency_ref }}
-            VITA_MAKEPKG_REF=master
+            VDPM_REF=${{ needs.prepare_jobs.outputs.dependency_ref }}
 
   build_tier0_main:
     needs: [prepare_jobs, prepare_docker]
@@ -111,7 +110,6 @@ jobs:
   build_tier1_main:
     needs: [prepare_jobs, prepare_docker, build_tier0_main]
 
-
     strategy:
       fail-fast: false
       matrix:
@@ -124,7 +122,6 @@ jobs:
 
   build_tier1_slow:
     needs: [prepare_jobs, prepare_docker, build_tier0_main, build_tier0_slow]
-
 
     strategy:
       fail-fast: false
@@ -139,7 +136,6 @@ jobs:
   build_tier2_main:
     needs: [prepare_jobs, prepare_docker, build_tier1_main]
 
-
     strategy:
       fail-fast: false
       matrix:
@@ -152,7 +148,6 @@ jobs:
 
   build_tier2_slow:
     needs: [prepare_jobs, prepare_docker, build_tier1_main, build_tier1_slow]
-
 
     strategy:
       fail-fast: false
@@ -167,7 +162,6 @@ jobs:
   build_tier3_main:
     needs: [prepare_jobs, prepare_docker, build_tier2_main]
 
-
     strategy:
       fail-fast: false
       matrix:
@@ -181,7 +175,6 @@ jobs:
   build_tier3_slow:
     needs: [prepare_jobs, prepare_docker, build_tier2_main, build_tier2_slow]
 
-
     strategy:
       fail-fast: false
       matrix:
@@ -194,7 +187,6 @@ jobs:
 
   build_tier4_main:
     needs: [prepare_jobs, prepare_docker, build_tier3_main]
-
 
     strategy:
       fail-fast: false
@@ -210,7 +202,6 @@ jobs:
   build_tier4_slow:
     needs: [prepare_jobs, prepare_docker, build_tier3_main, build_tier3_slow]
 
-
     strategy:
       fail-fast: false
       matrix:
@@ -223,7 +214,20 @@ jobs:
     secrets: inherit
 
   create-repository:
-    needs: [prepare_jobs, build_tier0_main, build_tier0_slow, build_tier1_main, build_tier1_slow, build_tier2_main, build_tier2_slow, build_tier3_main, build_tier3_slow, build_tier4_main, build_tier4_slow]
+    needs:
+      [
+        prepare_jobs,
+        build_tier0_main,
+        build_tier0_slow,
+        build_tier1_main,
+        build_tier1_slow,
+        build_tier2_main,
+        build_tier2_slow,
+        build_tier3_main,
+        build_tier3_slow,
+        build_tier4_main,
+        build_tier4_slow,
+      ]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
@@ -257,7 +261,7 @@ jobs:
 
   publish-snapshot:
     needs: create-repository
-    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/next') && github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -296,3 +300,12 @@ jobs:
           gh release download "$snapshot_tag" --dir downloaded-release
           diff -ru repository downloaded-release
           gh release edit "$snapshot_tag" --draft=false
+
+      - name: Trigger channel manifest update
+        env:
+          GH_TOKEN: ${{ secrets.REPO_DISPATCH_TOKEN || github.token }}
+        shell: bash
+        run: |
+          gh api repos/vitasdk/autobuilds/dispatches \
+            -f event_type=update_channel \
+            -f client_payload[packages_snapshot]="${snapshot_tag}" || true

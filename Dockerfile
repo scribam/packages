@@ -73,52 +73,21 @@ RUN wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tar.xz \
     && make install \
     && cd .. && rm -rf Python-2.7.18*
 
-# Clone and install VitaSDK
-# We use the existing bootstrap-vitasdk.sh logic
+# Clone and install VitaSDK using the pacman-based bootstrap
 ARG VITASDK_CACHE_BUST
+ARG VDPM_REF=next
 RUN echo "VitaSDK Cache Bust: $VITASDK_CACHE_BUST" && \
-    git clone --depth=1 https://github.com/vitasdk/vdpm.git /vdpm \
+    git clone --depth=1 --branch "$VDPM_REF" https://github.com/vitasdk/vdpm.git /vdpm \
     && cd /vdpm \
     && bash bootstrap-vitasdk.sh \
     && rm -rf /vdpm
-
-# Install the static rootless pacman client while the package-managed bootstrap
-# is being introduced. Once autobuilds publishes vitasdk-core packages this
-# transitional source build is removed from the image.
-ARG BUILDSCRIPTS_REF=next
-RUN git clone --depth=1 --branch "$BUILDSCRIPTS_REF" \
-      https://github.com/vitasdk/buildscripts.git /buildscripts \
-    && cmake -S /buildscripts -B /buildscripts/build-pacman \
-      -DBUILD_PACMAN_CLIENT=ON \
-      -DPACMAN_CLIENT_INSTALL_DIR=/pacman-client \
-    && cmake --build /buildscripts/build-pacman \
-      --target pacman-client-spike --parallel "$(nproc)" \
-    && install -m755 /pacman-client/bin/pacman /usr/local/vitasdk/bin/pacman \
-    && install -m755 /pacman-client/bin/pacman-conf \
-      /usr/local/vitasdk/bin/pacman-conf \
-    && rm -rf /buildscripts /pacman-client
-
-ARG VITA_MAKEPKG_REF=master
-RUN git clone --depth=1 --branch "$VITA_MAKEPKG_REF" \
-      https://github.com/vitasdk/vita-makepkg.git /opt/vita-makepkg \
-    && cp /opt/vita-makepkg/makepkg.conf.sample /opt/vita-makepkg/makepkg.conf \
-    && ln -sf /opt/vita-makepkg/vita-makepkg /usr/local/vitasdk/bin/vita-makepkg \
-    && install -d /usr/local/vitasdk/etc \
-      /usr/local/vitasdk/var/lib/pacman \
-      /usr/local/vitasdk/var/cache/pacman/pkg \
-      /usr/local/vitasdk/var/log \
-    && printf '%s\n' \
-      '[options]' \
-      'Architecture = auto vita' \
-      'SigLevel = Never' \
-      > /usr/local/vitasdk/etc/pacman.conf
 
 # Set environment variables
 ENV VITASDK=/usr/local/vitasdk
 ENV PATH=$VITASDK/bin:$PATH
 
 # Ensure the non-root user owns the vitasdk directory
-RUN chown -R vita:vita /usr/local/vitasdk /opt/vita-makepkg
+RUN chown -R vita:vita /usr/local/vitasdk
 
 USER vita
 WORKDIR /workspace
