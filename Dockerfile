@@ -84,8 +84,16 @@ RUN echo "VitaSDK Cache Bust: $VITASDK_CACHE_BUST" && \
         cd /tmp/vitasdk-bootstrap && \
         bootstrap_url="https://github.com/vitasdk/autobuilds/releases/download/${CORE_SNAPSHOT}/vitasdk-bootstrap-x86_64-linux-gnu.tar.bz2" && \
         wget -q "$bootstrap_url" -O bootstrap.tar.bz2 || { echo "Failed to download $bootstrap_url"; exit 1; } && \
-        wget -q "${bootstrap_url}.sha256" -O bootstrap.tar.bz2.sha256 || { echo "Failed to download SHA256 sidecar"; exit 1; } && \
+        if ! wget -q "${bootstrap_url}.sha256" -O bootstrap.tar.bz2.sha256; then \
+            echo "No .sha256 sidecar, reading the release SHA256SUMS instead" && \
+            wget -q "${bootstrap_url%/*}/SHA256SUMS" -O SHA256SUMS || { echo "Failed to download SHA256SUMS"; exit 1; }; \
+            awk -v archive="${bootstrap_url##*/}" '{ sub(/^\*/, "", $2) } $2 == archive { print $1 }' \
+                SHA256SUMS > bootstrap.tar.bz2.sha256; \
+        fi && \
         expected_sha=$(awk '{print $1}' bootstrap.tar.bz2.sha256) && \
+        if [ -z "$expected_sha" ]; then \
+            echo "No checksum published for ${bootstrap_url##*/} in $CORE_SNAPSHOT"; exit 1; \
+        fi && \
         actual_sha=$(sha256sum bootstrap.tar.bz2 | awk '{print $1}') && \
         if [ "$expected_sha" != "$actual_sha" ]; then \
             echo "Checksum mismatch for core snapshot $CORE_SNAPSHOT: expected $expected_sha, got $actual_sha"; exit 1; \
