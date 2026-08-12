@@ -1,0 +1,12 @@
+diff --git a/source/libtoloader.c b/source/libtoloader.c
+index 1529acd..77d76b0 100644
+--- a/source/libtoloader.c
++++ b/source/libtoloader.c
+@@ -16,6 +16,7 @@
+  * along with this program. If not, see <http://www.gnu.org/licenses/>.
+  */
+ 
++#include <stdint.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>

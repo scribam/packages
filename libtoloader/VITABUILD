@@ -1,9 +1,19 @@
 pkgname=libtoloader
 pkgver=0.0.0.r8.g41d2231
-pkgrel=1
+pkgrel=2
 url="https://github.com/Rinnegatamante/libtoloader"
-source=("git+https://github.com/Rinnegatamante/$pkgname.git#commit=41d2231a5fa14627f9492b768085123ecc49ea14")
-sha256sums=('SKIP')
+source=("git+https://github.com/Rinnegatamante/$pkgname.git#commit=41d2231a5fa14627f9492b768085123ecc49ea14"
+        "stdint-include.diff")
+sha256sums=('SKIP'
+            '41a60d12734aa50bdfcb5faf4645fdbb1674ceb869c3b0903282489118eaddca')
+
+# Downstream until it is upstreamed: libtoloader.c uses int32_t while
+# including only stdio, stdlib and string. It built because newlib's stdio.h
+# pulled in sys/types.h before 4.6.
+prepare() {
+  cd $pkgname
+  patch -p1 < ../stdint-include.diff
+}
 
 build() {
   cd $pkgname

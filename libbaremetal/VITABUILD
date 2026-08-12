@@ -1,9 +1,20 @@
 pkgname=libbaremetal
 pkgver=0.0.0.r73.g656a537
-pkgrel=1
+pkgrel=2
 url="https://github.com/xerpi/vita-libbaremetal.git"
-source=("git+https://github.com/xerpi/vita-libbaremetal.git#commit=656a53761f019acbb5046034e82f4038cadafced")
-sha256sums=('SKIP')
+source=("git+https://github.com/xerpi/vita-libbaremetal.git#commit=656a53761f019acbb5046034e82f4038cadafced"
+        "stdint-includes.diff")
+sha256sums=('SKIP'
+            'f6e44afb41da03b4d1a27ab756b42c307992b4cffee9b6566288fdeaf20dd279')
+
+# Downstream until it is upstreamed: four public headers declare uint32_t APIs
+# without including anything at all. They built because newlib's stdio.h
+# pulled in sys/types.h before 4.6. Only uart.h appears in the build log,
+# because the compiler stops there; the other three fail right after it.
+prepare() {
+  cd vita-libbaremetal
+  patch -p1 < ../stdint-includes.diff
+}
 
 build() {
   cd vita-libbaremetal/libbaremetal

@@ -1,0 +1,52 @@
+diff --git a/libbaremetal/include/display.h b/libbaremetal/include/display.h
+index b1ca617..ec17dd1 100644
+--- a/libbaremetal/include/display.h
++++ b/libbaremetal/include/display.h
+@@ -1,6 +1,8 @@
+ #ifndef DISPLAY_H
+ #define DISPLAY_H
+ 
++#include <stdint.h>
++
+ #include "iftu.h"
+ 
+ enum display_type {
+diff --git a/libbaremetal/include/draw.h b/libbaremetal/include/draw.h
+index 0e91e89..95f4eac 100644
+--- a/libbaremetal/include/draw.h
++++ b/libbaremetal/include/draw.h
+@@ -1,6 +1,8 @@
+ #ifndef DRAW_H
+ #define DRAW_H
+ 
++#include <stdint.h>
++
+ #include "display.h"
+ 
+ #define RGBA8(r, g, b, a)	((((a) & 0xFF) << 24) | (((b) & 0xFF) << 16) | \
+diff --git a/libbaremetal/include/font.h b/libbaremetal/include/font.h
+index cfb021d..ea13f5c 100644
+--- a/libbaremetal/include/font.h
++++ b/libbaremetal/include/font.h
+@@ -1,6 +1,8 @@
+ #ifndef FONT_H
+ #define FONT_H
+ 
++#include <stdint.h>
++
+ #include "draw.h"
+ 
+ void font_draw_char(int x, int y, uint32_t color, char c);
+diff --git a/libbaremetal/include/uart.h b/libbaremetal/include/uart.h
+index bfb9e58..d2ba46c 100644
+--- a/libbaremetal/include/uart.h
++++ b/libbaremetal/include/uart.h
+@@ -1,6 +1,8 @@
+ #ifndef UART_H
+ #define UART_H
+ 
++#include <stdint.h>
++
+ int uart_init(int bus, uint32_t baudrate);
+ void uart_wait_ready(int bus);
+ void uart_write(int bus, uint32_t data);
