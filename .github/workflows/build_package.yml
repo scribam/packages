@@ -49,6 +49,12 @@ jobs:
             find dependencies -type f -name '*.pkg.tar.*' -print0 | sort -z
           )
           (( ${#packages[@]} > 0 ))
+          # The bootstrap archive ships no var/ tree: vdpm and vita-makepkg
+          # create it on demand, and this direct invocation must do the same or
+          # pacman refuses the paths it is handed.
+          mkdir -p "$VITASDK/var/lib/pacman" \
+                   "$VITASDK/var/cache/pacman/pkg" \
+                   "$VITASDK/var/log"
           "$VITASDK/bin/pacman" \
             --config "$VITASDK/etc/pacman.conf" \
             --root "$VITASDK" \
