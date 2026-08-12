@@ -4,6 +4,7 @@ pkgrel=2
 url="https://github.com/Rinnegatamante/libtoloader"
 source=("git+https://github.com/Rinnegatamante/$pkgname.git#commit=41d2231a5fa14627f9492b768085123ecc49ea14"
         "stdint-include.diff")
+_follow=HEAD
 sha256sums=('SKIP'
             '41a60d12734aa50bdfcb5faf4645fdbb1674ceb869c3b0903282489118eaddca')
 

@@ -3,6 +3,7 @@ pkgver=0.0.0.r28.g26787fc
 pkgrel=1
 url="https://github.com/psxdev/debugnet"
 source=("git+https://github.com/psxdev/debugnet.git#commit=26787fce84582daa8f0c34726a5ca4aef0c6a5b8")
+_follow=HEAD
 sha256sums=('SKIP')
 
 build() {

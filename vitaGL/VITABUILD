@@ -3,6 +3,7 @@ pkgver=0.0.0.r1430.g3dddc43
 pkgrel=1
 url="https://github.com/Rinnegatamante"
 source=("git+https://github.com/Rinnegatamante/vitaGL.git#commit=3dddc43eff782a7ae7cc4b26498aba58fcf875c2")
+_follow=HEAD
 sha256sums=('SKIP')
 depends=('libmathneon' 'vitaShaRK' 'taihen' 'SceShaccCgExt')
 

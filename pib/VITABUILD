@@ -3,6 +3,7 @@ pkgver=2.0.r113.g3434597
 pkgrel=1
 url="https://github.com/SonicMastr/Pigs-In-A-Blanket"
 source=("git+https://github.com/SonicMastr/Pigs-In-A-Blanket.git#commit=343459751aa32e2a1bb8b54805a64a39d1b3f13a" "std.patch")
+_follow=HEAD
 sha256sums=('SKIP' 'SKIP')
 depends=('taihen')
 

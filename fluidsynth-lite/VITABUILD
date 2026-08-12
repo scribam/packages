@@ -3,6 +3,7 @@ pkgver=0.0.0.r493.g918f210
 pkgrel=1
 url="https://github.com/fgsfdsfgs/fluidsynth-lite"
 source=("git+https://github.com/fgsfdsfgs/fluidsynth-lite.git#commit=918f2107ea72c2765c29d9ee6f78d19b36374ed8")
+_follow=HEAD
 sha256sums=('SKIP')
 
 build() {

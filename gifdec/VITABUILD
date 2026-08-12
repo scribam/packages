@@ -3,6 +3,7 @@ pkgver=0.0.0.r57.g1dcbae1
 pkgrel=1
 url="https://github.com/lecram"
 source=("git+https://github.com/lecram/gifdec.git#commit=1dcbae19363597314f6623010cc80abad4e47f7c")
+_follow=HEAD
 sha256sums=('SKIP')
 
 build() {

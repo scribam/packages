@@ -3,6 +3,7 @@ pkgver=0.0.0.r188.ga8f15ab
 pkgrel=1
 url="https://github.com/xerpi/libvita2d"
 source=("git+https://github.com/xerpi/libvita2d.git#commit=a8f15ab09d5233f0a4e4ad0e8f6ade0da888cbed")
+_follow=HEAD
 sha256sums=('SKIP')
 depends=('zlib' 'libpng' 'libjpeg-turbo' 'freetype')
 

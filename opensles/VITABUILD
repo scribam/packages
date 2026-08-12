@@ -3,6 +3,7 @@ pkgver=0.0.0.r41.ge35b063
 pkgrel=1
 url="https://github.com/frangarcj/opensles"
 source=("git+https://github.com/frangarcj/opensles.git#commit=e35b0630ac4c9091db63374d5c111d719887dde9")
+_follow=HEAD
 sha256sums=('SKIP')
 depends=('libsndfile')
 

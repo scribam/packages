@@ -3,6 +3,7 @@ pkgver=2.7.r81103.g4f6d059
 pkgrel=1
 url="https://github.com/SonicMastr/cpython-vita"
 source=("git+https://github.com/SonicMastr/cpython-vita.git#commit=4f6d0590f16b7c55e0656b7c93a676fc10d1a1bc")
+_follow=HEAD
 sha256sums=('SKIP')
 depends=('openssl' 'libzip' 'xz' 'zlib' 'bzip2')
 

@@ -3,6 +3,7 @@ pkgver=0.0.0.r108.g77a1d39
 pkgrel=1
 url="https://github.com/xerpi/libftpvita"
 source=("git+https://github.com/xerpi/libftpvita.git#commit=77a1d39c1d6f11a55fe65a6ed9fe707bff5ede4b")
+_follow=HEAD
 sha256sums=('SKIP')
 
 build() {

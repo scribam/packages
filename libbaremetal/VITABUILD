@@ -4,6 +4,7 @@ pkgrel=2
 url="https://github.com/xerpi/vita-libbaremetal.git"
 source=("git+https://github.com/xerpi/vita-libbaremetal.git#commit=656a53761f019acbb5046034e82f4038cadafced"
         "stdint-includes.diff")
+_follow=HEAD
 sha256sums=('SKIP'
             'f6e44afb41da03b4d1a27ab756b42c307992b4cffee9b6566288fdeaf20dd279')
 
