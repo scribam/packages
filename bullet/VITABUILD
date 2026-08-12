@@ -1,8 +1,8 @@
 pkgname=bullet
-pkgver=2.87
+pkgver=2.87.r8.gb75d5ba
 pkgrel=1
 url="https://github.com/DrakonPL/bullet-physics-vita"
-source=("git+https://github.com/DrakonPL/bullet-physics-vita.git")
+source=("git+https://github.com/DrakonPL/bullet-physics-vita.git#commit=b75d5ba1ccbbdf7dd12f65976a45f0ca618fa9ac")
 sha256sums=('SKIP')
 
 build() {

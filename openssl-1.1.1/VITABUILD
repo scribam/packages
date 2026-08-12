@@ -1,8 +1,8 @@
 pkgname=openssl-1.1.1
-pkgver=1.1.1
+pkgver=1.1.1.r24282.g0a851f7
 pkgrel=1
 url="https://github.com/SonicMastr/vita-openssl3"
-source=("git+https://github.com/SonicMastr/vita-openssl3.git#branch=OpenSSL_1_1_1-vita")
+source=("git+https://github.com/SonicMastr/vita-openssl3.git#commit=0a851f7911a89ad82f0f3ada54939bb12acdd476")
 sha256sums=('SKIP')
 provides=('openssl=1.1.1')
 conflicts=('openssl')

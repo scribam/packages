@@ -1,8 +1,8 @@
 pkgname=kuio
-pkgver=9999
+pkgver=0.0.0.r21.g3279b89
 pkgrel=1
 url="https://github.com/Rinnegatamante/kuio"
-source=("git+https://github.com/Rinnegatamante/kuio.git" "vitasdk.patch")
+source=("git+https://github.com/Rinnegatamante/kuio.git#commit=3279b89558996b10d460bdd28ef7f2d4ca8a88a1" "vitasdk.patch")
 sha256sums=('SKIP' 'SKIP')
 depends=('taihen')
 

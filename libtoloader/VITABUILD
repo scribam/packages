@@ -1,8 +1,8 @@
 pkgname=libtoloader
-pkgver=9999
+pkgver=0.0.0.r8.g41d2231
 pkgrel=1
 url="https://github.com/Rinnegatamante/libtoloader"
-source=("git+https://github.com/Rinnegatamante/$pkgname.git")
+source=("git+https://github.com/Rinnegatamante/$pkgname.git#commit=41d2231a5fa14627f9492b768085123ecc49ea14")
 sha256sums=('SKIP')
 
 build() {

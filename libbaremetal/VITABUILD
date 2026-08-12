@@ -1,8 +1,8 @@
 pkgname=libbaremetal
-pkgver=9999
+pkgver=0.0.0.r73.g656a537
 pkgrel=1
 url="https://github.com/xerpi/vita-libbaremetal.git"
-source=("git+https://github.com/xerpi/vita-libbaremetal.git")
+source=("git+https://github.com/xerpi/vita-libbaremetal.git#commit=656a53761f019acbb5046034e82f4038cadafced")
 sha256sums=('SKIP')
 
 build() {

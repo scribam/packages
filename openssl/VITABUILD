@@ -1,8 +1,8 @@
 pkgname=openssl
-pkgver=1.0.2
+pkgver=1.0.2.r12304.gcd52124
 pkgrel=1
 url="https://github.com/d3m3vilurr/vita-openssl"
-source=("git+https://github.com/d3m3vilurr/vita-openssl.git")
+source=("git+https://github.com/d3m3vilurr/vita-openssl.git#commit=cd52124ffc8e0f0fc8e2bdde93d4c022a0a7fc53")
 sha256sums=('SKIP')
 
 build() {

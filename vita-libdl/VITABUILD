@@ -1,6 +1,6 @@
 pkgname=vita-libdl
-pkgver=9999
-pkgrel=2
+pkgver=0.0.0.r2.gbad0b43
+pkgrel=1
 url="https://github.com/v-atamanenko/vita-libdl"
 source=("git+https://github.com/v-atamanenko/$pkgname.git#commit=bad0b43b7c018178dba8c059df3f9d9bd5ec742d")
 sha256sums=('SKIP')

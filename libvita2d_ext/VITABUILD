@@ -1,8 +1,8 @@
 pkgname=libvita2d_ext
-pkgver=9999
+pkgver=0.0.0.r4.gc3f5774
 pkgrel=1
 url="https://github.com/frangarcj/libvita2d_ext"
-source=("git+https://github.com/frangarcj/libvita2d_ext.git" "fini.patch")
+source=("git+https://github.com/frangarcj/libvita2d_ext.git#commit=c3f5774bac28a41c75b0ca1e7179656e01a943f2" "fini.patch")
 sha256sums=('SKIP' 'SKIP')
 depends=('libvita2d')
 

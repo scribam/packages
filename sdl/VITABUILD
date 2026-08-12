@@ -1,8 +1,8 @@
 pkgname=sdl
-pkgver=1.2.16
+pkgver=1.2.16.r3083.gc7158c8
 pkgrel=1
 url='https://www.libsdl.org'
-source=("git+https://github.com/Northfear/SDL-1.2-vita.git")
+source=("git+https://github.com/Northfear/SDL-1.2-vita.git#commit=c7158c8a9e5ff2fd3daca7556e1774927c2a4511")
 sha256sums=('SKIP')
 
 build() {

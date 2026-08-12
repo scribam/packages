@@ -1,8 +1,8 @@
 pkgname=taipool
-pkgver=9999
+pkgver=0.0.0.r17.g8e4de0a
 pkgrel=1
 url="https://github.com/Rinnegatamante/taipool"
-source=("git+https://github.com/Rinnegatamante/taipool.git")
+source=("git+https://github.com/Rinnegatamante/taipool.git#commit=8e4de0af4559f405dcc70f529344367be6c98358")
 sha256sums=('SKIP')
 
 build() {

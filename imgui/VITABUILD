@@ -1,8 +1,8 @@
 pkgname=imgui
-pkgver=9999
+pkgver=0.0.0.r32.ga056225
 pkgrel=1
 url="https://github.com/Rinnegatamante/imgui-vita"
-source=("git+https://github.com/Rinnegatamante/imgui-vita.git")
+source=("git+https://github.com/Rinnegatamante/imgui-vita.git#commit=a0562251489838cc45b7ea287fa5304d090697f5")
 sha256sums=('SKIP')
 depends=('libmathneon' 'vitaGL')
 

@@ -1,8 +1,8 @@
 pkgname=libmathneon
-pkgver=9999
+pkgver=0.0.0.r11.g0faab81
 pkgrel=1
 url="https://github.com/Rinnegatamante/math-neon"
-source=("git+https://github.com/Rinnegatamante/math-neon.git")
+source=("git+https://github.com/Rinnegatamante/math-neon.git#commit=0faab814782c071ff4015527f1ca955ab1ccc470")
 sha256sums=('SKIP')
 
 build() {

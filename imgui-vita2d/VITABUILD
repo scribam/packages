@@ -1,8 +1,8 @@
 pkgname=imgui-vita2d
-pkgver=9999
+pkgver=0.0.0.r19.ga849382
 pkgrel=1
 url="https://github.com/cy33hc/imgui-vita2d"
-source=("git+https://github.com/cy33hc/imgui-vita2d.git")
+source=("git+https://github.com/cy33hc/imgui-vita2d.git#commit=a849382de1b9e1662ec1440cf7a936f3b4cacff3")
 sha256sums=('SKIP')
 depends=('libvita2d')
 
