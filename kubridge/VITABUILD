@@ -12,9 +12,17 @@ depends=('taihen')
 # offset 0xC of SceKernelAllocMemBlockKernelOpt vbase, which is what kubridge
 # writes there, and started declaring SceKernelObject, which kubridge also
 # declared. Nothing here dereferences that type, only points at it.
+#
+# The SDK being built against decides whether that patch belongs: a release
+# that predates the PR still calls the field field_C, and applying it there
+# would fail. Asking the header is the same question CMake would ask upstream
+# with check_struct_has_member, which is how this leaves once it is merged.
 prepare() {
   cd $pkgname
-  patch -p1 < ../vita-headers-886.diff
+  if grep -Eq '[[:space:]]vbase;' \
+      "$VITASDK/arm-vita-eabi/include/psp2kern/kernel/sysmem.h"; then
+    patch -p1 < ../vita-headers-886.diff
+  fi
 }
 
 build() {
